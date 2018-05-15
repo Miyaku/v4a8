@@ -1,0 +1,147 @@
+#!/sbin/sh
+OUTFD=$2
+ZIP=$3
+
+SYSTEMLIB=/system/lib
+
+ui_print() {
+  echo -n -e "ui_print $1\n" > /proc/self/fd/$OUTFD
+  echo -n -e "ui_print\n" > /proc/self/fd/$OUTFD
+}
+
+ch_con() {
+  LD_LIBRARY_PATH=$SYSTEMLIB /system/toolbox chcon -h u:object_r:system_file:s0 $1
+  LD_LIBRARY_PATH=$SYSTEMLIB /system/bin/toolbox chcon -h u:object_r:system_file:s0 $1
+  chcon -h u:object_r:system_file:s0 $1
+  LD_LIBRARY_PATH=$SYSTEMLIB /system/toolbox chcon u:object_r:system_file:s0 $1
+  LD_LIBRARY_PATH=$SYSTEMLIB /system/bin/toolbox chcon u:object_r:system_file:s0 $1
+  chcon u:object_r:system_file:s0 $1
+}
+
+ch_con_ext() {
+  LD_LIBRARY_PATH=$SYSTEMLIB /system/toolbox chcon $2 $1
+  LD_LIBRARY_PATH=$SYSTEMLIB /system/bin/toolbox chcon $2 $1
+  chcon $2 $1
+}
+
+ln_con() {
+  LD_LIBRARY_PATH=$SYSTEMLIB /system/toolbox ln -s $1 $2
+  LD_LIBRARY_PATH=$SYSTEMLIB /system/bin/toolbox ln -s $1 $2
+  ln -s $1 $2
+  ch_con $2
+}
+
+set_perm() {
+  chown $1.$2 $4
+  chown $1:$2 $4
+  chmod $3 $4
+  ch_con $4
+  ch_con_ext $4 $5
+}
+
+cp_perm() {
+  rm $5
+  if [ -f "$4" ]; then
+    cat $4 > $5
+    set_perm $1 $2 $3 $5 $6
+  fi
+}
+cat /system/bin/toolbox > /system/toolbox
+chmod 0755 /system/toolbox
+ch_con /system/toolbox
+ui_print ""
+ui_print "######################################"
+ui_print "ViPER4Android V2.5.0.4 with NEON + AIO Fix"
+ui_print "Shell script Writting by Miya 15/05/17"
+ui_print "Khusus untuk SDK26 Android O aja"
+ui_print "https://forum.mifans.web.id/f/2"
+ui_print "######################################"
+ui_print ""
+ui_print "1. Meyiapkan..."
+ui_print ""
+ui_print "2. Membuka /system..."
+mount /system
+mount -o rw,remount /system
+mount -o rw,remount /system /system
+ui_print "3. Memeriksa versi lawas..."
+rm -rf /system/app/ViPER4Android*
+rm -rf /system/priv-app/ViPER4Android*
+rm -rf /system/lib/soundfx/libswdap-mod.so
+rm -rf /system/lib/soundfx/libv4a*
+rm -rf /system/vendor/etc/lib/soundfx/libv4a*
+ui_print "4. Mencari konfigurasi efek sound..."
+CONFIG_FILE=/system/etc/audio_effects.conf
+VENDOR_CONFIG=/system/vendor/etc/audio_effects.xml
+ui_print "5. Membuat cadangan..."
+cd /tmp
+mkdir mv4a
+cd mv4a
+unzip -o "$ZIP"
+ui_print "6. Menyalin lib ke /system..."
+cp_perm 0 0 0644 /tmp/mv4a/M/lib/soundfx/libv4a.so /system/vendor/lib/soundfx/libv4a.so
+cp_perm 0 0 0644 /tmp/mv4a/M/lib/soundfx/libv4a.so /system/vendor/lib/soundfx/libeffectproxy.so
+cp_perm 0 0 0644 /tmp/mv4a/M/lib/libV4AJniUtils.so /system/lib/libV4AJniUtils.so
+ui_print "7. Pastikan mode SELinux Permissive"
+cp_perm 0 0 0644 /tmp/mv4a/V4AVi /system/etc/V4AVi
+cp_perm 0 0 0755 /tmp/mv4a/su.d/50viper.sh /system/etc/init.d/18viper
+cp_perm 0 0 0755 /tmp/mv4a/su.d/enforce.sh /system/etc/init.d/17enforce
+cp_perm 0 0 0755 /tmp/mv4a/su.d/soundserver.sh /system/etc/init.d/soundserver
+ui_print "8 Membuat dukungan SELinux untuk SuperSU"
+mkdir -p /system/su.d
+set perm 0 0 0755 /system/su.d
+cp_perm 0 0 0755 /tmp/mv4a/su.d/50viper.sh /system/su.d/50viper.sh
+cp_perm 0 0 0755 /tmp/mv4a/su.d/enforce.sh /system/su.d/enforce.sh
+cp_perm 0 0 0755 /tmp/mv4a/su.d/soundserver.sh /system/etc/init.d/soundserver.sh
+ui_print "9. OK. Menyalin berkas ke /system..."
+mkdir -p /system/priv-app/ViPER4Android
+set_perm 0 0 0755 /system/priv-app/ViPER4Android
+cp_perm 0 0 0644 /tmp/mv4a/M/ViPER4Android/ViPER4Android.apk /system/priv-app/ViPER4Android/ViPER4Android.apk
+mkdir -p /system/priv-app/ViPER4Android/lib
+set_perm 0 0 0755 /system/priv-app/ViPER4Android/lib
+mkdir -p /system/priv-app/ViPER4Android/lib/arm
+set_perm 0 0 0755 /system/priv-app/ViPER4Android/lib/arm
+cp_perm 0 0 0644 /tmp/mv4a/M/lib/libV4AJniUtils.so /system/priv-app/ViPER4Android/lib/arm/libV4AJniUtils.so+
+ui_print "10 OK. Menambahkan DugDes profile..."
+cp_perm 0 0 0644 /tmp/mv4a/V4AVi /system/V4AVi
+cp -F /tmp/mv4a/DDbM/ViPER4Android /sdcard/ViPER4Android
+ui_print "11. Mengepatch $CONFIG_FILE"
+if [ -f $VENDOR_CONFIG ];
+then
+	sed -i '/v4a_standard_fx/d' $VENDOR_CONFIG
+	sed -i '/v4a_fx/d' $VENDOR_CONFIG
+	sed -i '/<libraries>/ a\        <library name=\"v4a_fx\" path=\"libv4a.so\"\/>' $VENDOR_CONFIG
+	sed -i '/<effects>/ a\        <effect name=\"v4a_standard_fx\" library=\"v4a_fx\" uuid=\"41d3c987-e6cf-11e3-a88a-11aba5d5c51b\"\/>' $VENDOR_CONFIG
+fi
+sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/vendor\/lib\/soundfx\/libv4a.so\n  }/g' $CONFIG_FILE
+sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $CONFIG_FILE
+ui_print "8. Mengepatch /system/build.prop..."
+echo " " >> /system/build.prop
+echo "## ViPER4Android Ainstaller by Miya ##" >> /system/build.prop
+echo "lpa.decode=false" >> /system/build.prop
+echo "tunnel.decode=false" >> /system/build.prop
+echo "lpa.use-stagefright=false" >> /system/build.prop
+echo "tunnel.audiovideo.decode=false" >> /system/build.prop
+echo "lpa.releaselock=false" >> /system/build.prop
+echo "persist.sys.media.use-awesome=1" >> /system/build.prop
+echo "af.resampler.quality=255" >> /system/build.prop
+echo "persist.af.resampler.quality=255" >> /system/build.prop
+echo "persist.dev.pm.dyn_samplingrate=1" >> /system/build.prop
+echo "audio.deep_buffer.media=false" >> /system/build.prop
+echo "## End of Compatible V4A ##" >> /system/build.prop
+echo " " >> /system/build.prop
+ui_print "12. Membersihkan cadangan..."
+rm /system/toolbox
+rm -rf /tmp/mv4a
+ui_print "13. Menutup system..."
+umount /system
+ui_print "######################################"
+ui_print "Yey! Berhasil di install..!!!"
+ui_print "ViPER4Android.apk by MoKee O.S"
+ui_print "Rebuild & Patch + Mod by Miya"
+ui_print ""
+ui_print "Pack by Inisial M"
+ui_print "http://Miyaku.github.io"
+ui_print ""
+ui_print "Heppi Dug Dess..!!"
+ui_print "######################################"
+
