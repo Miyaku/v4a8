@@ -1,9 +1,9 @@
-# Viper4Android for Android 8.x Oreo based AOSP
+# Viper4Android for Android 8.x 😎
 
-<b>NOT</b> like in Android version before, the v4a won't work in SDK26 because in Android O he change audio config format from <i>.conf</i> to <i>.xml</i> and merged sounfx library to one directory in <code>/system/vendor/lib/soundfx/</code> not in <code>/system/lib/soundfx/</code> anymore, so you must have new line to configurations drivers and library, if not your v4a still wont work and will ask you to install driver always.
+<b>NOT</b> like in Android version before, the v4a won't work in SDK26 because in Android O he change audio config format from <i>.conf</i> to <i>.xml</i> and merged soundfx library to one directory in <code>/system/vendor/lib/soundfx/</code> not in <code>/system/lib/soundfx/</code> anymore, so you must have new line to configurations drivers and library, if not your v4a still wont work and will ask you to install driver always 🙈
 
 # First
-Still same on old sdk version, you must add to <code>/system/etc/audio_effects.conf</code>
+Still same on old sdk version, you must add to <code>/system/etc/audio_effects.conf</code><br>
 Under “libraries {“, add:
 <pre>
 v4a_fx {
@@ -29,7 +29,7 @@ I use Viper4Android Driver v.2.5.0.4 with NEON + AIO Fix + DDbM by Me. Tested wo
 
 Yeah, you ready to Rocks, don't forget to set SELinux to Permissive 😉
 
-Credit Viper4Android
+Credit Viper4Android 😍
 
 
 
