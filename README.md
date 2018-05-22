@@ -2,7 +2,7 @@
 
 <b>NOT</b> like in Android version before, the v4a won't work in SDK26 because in Android O he change audio config format from <i>.conf</i> to <i>.xml</i> and merged soundfx library to one directory in <code>/system/vendor/lib/soundfx/</code> not in <code>/system/lib/soundfx/</code> anymore, so you must have new line to configurations drivers and library, if not your v4a still wont work and will ask you to install driver always 🙈
 
-Please read <a href="https://github.com/Miyaku/mkv4a-old"OLD VERSION</a> if you not know how to work!
+Please read <a href="https://github.com/Miyaku/mkv4a-old">OLD VERSION</a> if you not know how to work!
 
 # First
 Still same on old sdk version, you must add to <code>/system/etc/audio_effects.conf</code><br>
